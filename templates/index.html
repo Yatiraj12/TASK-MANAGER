@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Task Manager</title>
+</head>
+<body>
+  <h1>My Task Manager</h1>
+
+  <!-- Add Task Form -->
+  <form id="taskForm">
+    <input type="text" id="title" placeholder="Task title" required>
+    <input type="text" id="description" placeholder="Task description" required>
+    <button type="submit">Add Task</button>
+  </form>
+
+  <hr>
+
+  <!-- Load Tasks Button -->
+  <button onclick="loadTasks()">Load Tasks</button>
+
+  <!-- Task List -->
+  <ul id="taskList"></ul>
+
+  <script>
+    // Add Task
+    document.getElementById("taskForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      let title = document.getElementById("title").value;
+      let description = document.getElementById("description").value;
+
+      let res = await fetch("/add_task", {   // 👈 Notice no http://127... needed now
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, description })
+      });
+
+      let data = await res.json();
+      alert(data.message);
+      loadTasks(); // refresh task list
+    });
+
+    // Load Tasks
+    async function loadTasks() {
+      let res = await fetch("/get_tasks");   // 👈 Works directly with Flask
+      let tasks = await res.json();
+
+      let list = document.getElementById("taskList");
+      list.innerHTML = "";
+      tasks.forEach(task => {
+        let li = document.createElement("li");
+        li.innerText = task.title + " - " + task.status;
+        list.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
